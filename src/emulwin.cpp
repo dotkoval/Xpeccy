@@ -621,6 +621,9 @@ void MainWin::frame_timer() {
 	repaint();				// (?) recursive repaint if signals is on
 	setUpdatesEnabled(false);
 	blockSignals(false);
+#ifdef USENETWORK
+    sendUdpData();
+#endif
 }
 
 void MainWin::d_frame() {

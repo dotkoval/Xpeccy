@@ -15,6 +15,41 @@ void MainWin::openServer() {
 	} else {
 		printf("Listening port %i\n", (conf.port + i) & 0xffff);
 	}
+
+    udpSocket = new QUdpSocket(this);
+    udpAddress = QHostAddress("127.0.0.1");  // Замените на IP клиента
+    udpPort = 0;  // Порт для UDP передачи
+
+    // Привязываем сокет для прослушивания на порту 12345
+    if (!udpSocket->bind(QHostAddress::Any, 16384)) {
+        qDebug() << "Failed to bind UDP socket!";
+    } else {
+        qDebug() << "UDP socket bound successfully on port 16384";
+    }
+}
+
+void MainWin::sendUdpData() {
+	Computer* comp = conf.prof.cur->zx;
+
+    if (udpSocket->hasPendingDatagrams()) {
+        QByteArray datagram;
+        datagram.resize(udpSocket->pendingDatagramSize());
+        QHostAddress sender;
+        quint16 senderPort;
+
+        udpSocket->readDatagram(datagram.data(), datagram.size(), &sender, &senderPort);
+
+        qDebug() << "Received datagram from" << sender.toString() << ":" << senderPort;
+        
+        // Сохраняем адрес клиента для последующей отправки данных
+        udpAddress = sender;
+        udpPort = senderPort;
+	}
+
+	if (udpPort>0) {
+		QByteArray data(reinterpret_cast<const char*>(comp->mem->ramData + (5 << 14)), 0x1b00);
+   		udpSocket->writeDatagram(data, udpAddress, udpPort);
+    }
 }
 
 void MainWin::closeServer() {

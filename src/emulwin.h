@@ -8,6 +8,7 @@
 #ifdef USENETWORK
 #include <QTcpServer>
 #include <QTcpSocket>
+#include <QUdpSocket>
 #endif
 
 #include <SDL.h>
@@ -151,6 +152,9 @@ typedef struct {
 		#ifdef USENETWORK
 		QTcpServer srv;
 		QList<QTcpSocket*> clients;
+	    QUdpSocket* udpSocket;
+    	QHostAddress udpAddress;
+	    quint16 udpPort;
 		#endif
 
 		int msgTimer;
@@ -168,6 +172,7 @@ typedef struct {
 #ifdef USENETWORK
 		void openServer();
 		void closeServer();
+		void sendUdpData();
 #endif
 		QMenu* userMenu;
 		QMenu* bookmarkMenu;
