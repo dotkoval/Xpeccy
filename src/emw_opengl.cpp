@@ -15,6 +15,7 @@ void MainWin::initializeGL() {
 	frmt.setStencilBufferSize(8);
 	frmt.setVersion(3,0);
 	frmt.setProfile(QSurfaceFormat::CoreProfile);
+    timeBeginPeriod(1);
 	QSurfaceFormat::setDefaultFormat(frmt);
 	// setFormat(frmt);
 	conf.vid.shd_support = QOpenGLShader::hasOpenGLShaders(QOpenGLShader::Vertex) && QOpenGLShader::hasOpenGLShaders(QOpenGLShader::Fragment);
