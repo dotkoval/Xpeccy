@@ -119,6 +119,11 @@ void xThread::tap_catch_save(Computer* comp) {
 	}
 }
 
+int frameMeasureIteration = 0;
+int frameMeasureCount = 0;
+int frameMeasurePoints[3] = {0,0,0};
+bool frameMeasureSession = false;
+
 void xThread::emuCycle(Computer* comp) {
 	int tm;
 	int brkskip = 0;
@@ -200,6 +205,44 @@ void xThread::emuCycle(Computer* comp) {
 							ptr->count++;
 							comp->flgBRK = 0;
 							if (ptr->fetch) brkskip = 1;
+							{
+								xAdr pdAdr = find_label("aentity.platform_direction");
+								if (pdAdr.type != -1 && comp->mem->ramData[pdAdr.abs] != 0) {
+
+									frameMeasureSession = true;
+									frameMeasurePoints[frameMeasureIteration] += comp->frmtCount;
+
+									if (frameMeasureIteration==0) {
+										printf("   T-#%02d:",frameMeasureCount);
+									}
+									printf("%8d", comp->frmtCount);
+									frameMeasureIteration++;
+
+									if (frameMeasureIteration>2) {
+										frameMeasureIteration = 0;
+										frameMeasureCount++;
+										printf("\n");
+									} else {
+										printf(",");
+									}
+
+								} else if (frameMeasureSession) {
+									printf("------------------------------------\n");
+									printf(
+										" Average:%8d,%8d,%8d\n", 
+										frameMeasurePoints[0]/frameMeasureCount,
+										frameMeasurePoints[1]/frameMeasureCount,
+										frameMeasurePoints[2]/frameMeasureCount
+									);
+									printf("------------------------------------\n");
+
+									frameMeasurePoints[0] = 0;
+									frameMeasurePoints[1] = 0;
+									frameMeasurePoints[2] = 0;
+									frameMeasureCount = 0;
+									frameMeasureSession = false;
+								}
+							}
 							break;
 						case BRK_ACT_SCR:
 							fnams = QString(conf.scrShot.dir.c_str()).append(SLASH);
